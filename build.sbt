@@ -1,27 +1,14 @@
-ThisBuild / scalaVersion := "2.13.16"
-ThisBuild / version := "0.1.0"
-ThisBuild / organization := "None"
-
-val chiselVersion = "7.0.0"
+ThisBuild / scalaVersion := "2.13.17"
+ThisBuild / version := "0.1.0-SNAPSHOT"
+ThisBuild / organization := "com.example"
+ThisBuild / organizationName := "example"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "RISC-V-ISA-SIM",
+    name := "risc-v-isa-sim",
     libraryDependencies ++= Seq(
-      "org.chipsalliance" %% "chisel" % chiselVersion,
-      "org.scalatest" %% "scalatest" % "3.2.16" % "test"
-    ),
-    scalacOptions ++= Seq(
-      "-language:reflectiveCalls",
-      "-deprecation",
-      "-feature",
-      "-Xcheckinit",
-      "-Ymacro-annotations"
-    ),
-    addCompilerPlugin(
-      "org.chipsalliance" % "chisel-plugin" % chiselVersion cross CrossVersion.full
+      "org.scalatest" %% "scalatest" % "3.2.19" % "test"
     )
   )
 
-Test / testOptions +=
-  Tests.Argument(TestFrameworks.ScalaTest, "-DemitVcd=1")
+// See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.

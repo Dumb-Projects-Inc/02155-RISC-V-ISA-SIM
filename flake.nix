@@ -1,13 +1,13 @@
 {
   description = "A Nix-flake-based Scala development environment";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/10a8c79dc0d1e447609349f142a46a3dbd7dfa3a";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
   outputs = {
     self,
     nixpkgs,
   }: let
-    javaVersion = 21; # Change this value to update the whole stack
+    javaVersion = 25; # Change this value to update the whole stack
 
     supportedSystems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
     forEachSupportedSystem = f:
@@ -28,8 +28,7 @@
 
     devShells = forEachSupportedSystem ({pkgs}: {
       default = pkgs.mkShell {
-        packages = with pkgs; [sbt coursier gtkwave verilator jdk circt python3];
-        CHISEL_FIRTOOL_PATH = "${pkgs.circt}/bin";
+        packages = with pkgs; [sbt jdk];
       };
     });
   };

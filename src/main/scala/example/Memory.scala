@@ -1,10 +1,10 @@
 package example
 
 object Types {
-  type UINT_8 = Byte
-  type UINT_16 = Short
-  type UINT_32 = Int
-  type UINT_64 = Long
+  type INT_8 = Byte
+  type INT_16 = Short
+  type INT_32 = Int
+  type INT_64 = Long
 }
 import Types._
 
@@ -14,19 +14,19 @@ object Reg extends Enumeration {
       S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, T3, T4, T5, T6 = Value
 }
 class Registers() {
-  private val regs: Array[UINT_32] = Array.ofDim[UINT_32](32)
+  private val regs: Array[INT_32] = Array.ofDim[INT_32](32)
 
   // Overload access operators
-  def apply(reg: Reg.Value): UINT_32 = regs(reg.id)
-  def update(reg: Reg.Value, value: UINT_32): Unit = {
+  def apply(reg: Reg.Value): INT_32 = regs(reg.id)
+  def update(reg: Reg.Value, value: INT_32): Unit = {
     if (reg != Reg.ZERO) regs(reg.id) = value
   }
 }
 class Memory() {
-  private val memory: Array[UINT_32] = Array.ofDim[UINT_32](1 << 16)
+  private val memory: Array[INT_32] = Array.ofDim[INT_32](1 << 16)
 
-  def read(addr: UINT_32): UINT_32 = memory((addr >> 2).toInt)
-  def write(addr: UINT_32, value: UINT_32): Unit = {
+  def read(addr: INT_32): INT_32 = memory((addr >> 2).toInt)
+  def write(addr: INT_32, value: INT_32): Unit = {
     memory((addr >> 2).toInt) = value
   }
 }

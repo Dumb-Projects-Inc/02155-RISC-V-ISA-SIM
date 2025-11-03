@@ -1,8 +1,10 @@
 package example
 
 object Types {
-  type UINT_32 = Long
+  type UINT_8 = Byte
   type UINT_16 = Short
+  type UINT_32 = Int
+  type UINT_64 = Long
 }
 import Types._
 

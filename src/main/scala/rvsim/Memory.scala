@@ -1,6 +1,4 @@
-package example
-
-import java.nio.file.{Files, Paths}
+package rvsim
 
 object Types {
   type INT_8 = Byte
@@ -36,21 +34,5 @@ class Memory() {
 
   def write(addr: INT_32, value: INT_32): Unit = {
     memory(wordIndex(addr)) = value
-  }
-  def load_program(bin_path: String): Unit = {
-    // load file
-    val bin_bytes: Array[Int] =
-      Files.readAllBytes(Paths.get(bin_path)).map(_ & 0xff)
-    // load into 32-bit little-endian
-    val word = bin_bytes.grouped(4).toArray
-    val little_endian = word.map { bytes =>
-      (bytes(0) & 0xff) |
-        ((bytes(1) & 0xff) << 8) |
-        ((bytes(2) & 0xff) << 16) |
-        ((bytes(3) & 0xff) << 24)
-    }
-    // write to memory
-    Array.copy(little_endian, 0, memory, 0, little_endian.length)
-
   }
 }

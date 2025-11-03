@@ -1,4 +1,4 @@
-package example
+package rvsim
 
 import Types._
 
@@ -7,14 +7,11 @@ class VM() {
   private val regs = new Registers()
   private var pc: UINT_32 = 0x0000_0000
 
-  def step(): Boolean = {
+  def step(): Unit = {
     // Fetch instruction
     val instr = mem.read(pc)
     // Decode and execute instruction
     // TODO: Decoder and extract fields
-    // TODO: Execute instruction
-    pc += 4
-    true
   }
 
   def run(): Unit = {

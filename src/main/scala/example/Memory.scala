@@ -4,19 +4,18 @@ enum Reg:
          A6, A7, S2, S3, S4, S5, S6, S7,
          S8, S9, S10, S11, T3, T4, T5, T6
 
-object Registers:
-    def create_Registers(): Array[UInt32] = Array.ofDim[UINT_32](Reg.T6.ordinal + 1)
-    val regs: Array[UINT_32] = create_Registers()
+class Registers:
+    private val regs: Array[UINT_32] = Array.ofDim[UINT_32](Reg.T6.ordinal + 1)
 
     //Overload access operators
     def [](reg: Reg): UINT_32 = regs(reg.ordinal)
     def []=(reg: Reg, value: UINT_32): Unit =
         if reg != Reg.ZERO then regs(reg.ordinal) = value
 
-object Memory:
-    val memorySize: Int = 1 << 32 // 32 bit system - max
-    val memory: Array[UInt32] = Array.fill(memorySize)(0) // 32 bit addressable memory with 32 bit words
+class Memory:
+    private val memory: Array[UINT_32] = Array.ofDim[UINT_32](1 << 16)
 
-    def pos_addr(addr: UINT_32): Int = addr & 0xFFFF_FFFF
-    def mem_write(addr: UINT_32, value: UINT_32): Unit = Memory.memory(pos_addr(addr)) = value
-    def mem_read(addr: UINT_32): UINT_32 = Memory.memory(pos_addr(addr))
+
+    def read(addr: UINT_32): UINT_32 = memory((addr >> 2).toInt)
+    def write(addr: UINT_32, value: UINT_32): Unit = 
+        memory((addr >> 2).toInt) = value

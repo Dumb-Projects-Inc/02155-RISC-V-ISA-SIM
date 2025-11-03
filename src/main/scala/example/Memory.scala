@@ -3,7 +3,15 @@ enum Reg:
          S0, S1, A0, A1, A2, A3, A4, A5,
          A6, A7, S2, S3, S4, S5, S6, S7,
          S8, S9, S10, S11, T3, T4, T5, T6
-var registers: Array[UInt32] = Array.ofDim[UINT_32](Reg.T6.ordinal + 1)
+
+object Registers:
+    def create_Registers(): Array[UInt32] = Array.ofDim[UINT_32](Reg.T6.ordinal + 1)
+    val regs: Array[UINT_32] = create_Registers()
+
+    //Overload access operators
+    def [](reg: Reg): UINT_32 = regs(reg.ordinal)
+    def []=(reg: Reg, value: UINT_32): Unit =
+        if reg != Reg.ZERO then regs(reg.ordinal) = value
 
 object Memory:
     val memorySize: Int = 1 << 32 // 32 bit system - max

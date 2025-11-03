@@ -52,3 +52,6 @@ enum OP:
     BGE,
     BLTU,
     BGEU
+
+object OP:
+    def LUI(instr: UINT_32): Unit = {}

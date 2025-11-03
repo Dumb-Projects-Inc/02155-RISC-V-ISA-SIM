@@ -4,57 +4,56 @@ import Types._
 
 sealed trait OP
 
-object OP {
-  case object LUI extends OP
-  case object AUIPC extends OP
-  case object ADDI extends OP
-  case object SLTI extends OP
-  case object SLTIU extends OP
-  case object XORI extends OP
-  case object ORI extends OP
-  case object ANDI extends OP
-  case object SLLI extends OP
-  case object SRLI extends OP
-  case object SRAI extends OP
-  case object ADD extends OP
-  case object SUB extends OP
-  case object SLL extends OP
-  case object SLT extends OP
-  case object SLTU extends OP
-  case object XOR extends OP
-  case object SRL extends OP
-  case object SRA extends OP
-  case object OR extends OP
-  case object AND extends OP
-  // case object FENCE extends OP
-  // case object FENCE_I extends OP
-  // case object CSRRW extends OP
-  // case object CSRRS extends OP
-  // case object CSRRC extends OP
-  // case object CSRRWI extends OP
-  // case object CSRRSI extends OP
-  // case object CSRRCI extends OP
-  case object ECALL extends OP
-  // case object EBREAK extends OP
-  case object URET extends OP
-  case object SRET extends OP
-  case object MRET extends OP
-  case object WFI extends OP
-  // case object SFENCE_VMA extends OP
-  case object LB extends OP
-  case object LH extends OP
-  case object LW extends OP
-  case object LBU extends OP
-  case object LHU extends OP
-  case object SB extends OP
-  case object SH extends OP
-  case object SW extends OP
-  case object JAL extends OP
-  case object JALR extends OP
-  case object BEQ extends OP
-  case object BNE extends OP
-  case object BLT extends OP
-  case object BGE extends OP
-  case object BLTU extends OP
-  case object BGEU extends OP
-}
+case class LUI(rd: Reg.value, imm: Int) extends OP
+case class AUIPC extends OP
+case class ADDI extends OP
+case class SLTI extends OP
+case class SLTIU extends OP
+case class XORI extends OP
+case class ORI extends OP
+case class ANDI extends OP
+case class SLLI extends OP
+case class SRLI extends OP
+case class SRAI extends OP
+case class ADD extends OP
+case class SUB extends OP
+case class SLL extends OP
+case class SLT extends OP
+case class SLTU extends OP
+case class XOR extends OP
+case class SRL extends OP
+case class SRA extends OP
+case class OR extends OP
+case class AND extends OP
+// case class FENCE extends OP
+// case class FENCE_I extends OP
+// case class CSRRW extends OP
+// case class CSRRS extends OP
+// case class CSRRC extends OP
+// case class CSRRWI extends OP
+// case class CSRRSI extends OP
+// case class CSRRCI extends OP
+case class ECALL extends OP
+// case class EBREAK extends OP
+case class URET extends OP
+case class SRET extends OP
+case class MRET extends OP
+case class WFI extends OP
+// case class SFENCE_VMA extends OP
+case class LB extends OP
+case class LH extends OP
+case class LW extends OP
+case class LBU extends OP
+case class LHU extends OP
+case class SB extends OP
+case class SH extends OP
+case class SW extends OP
+case class JAL extends OP
+case class JALR extends OP
+case class BEQ extends OP
+case class BNE extends OP
+case class BLT extends OP
+case class BGE extends OP
+case class BLTU extends OP
+case class BGEU extends OP
+

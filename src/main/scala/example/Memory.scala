@@ -2,12 +2,9 @@ package example
 
 object Types {
   type UINT_32 = Long
+  type UINT_16 = Short
 }
 import Types._
-
-sealed trait Reg {
-  def ordinal: Int
-}
 
 object Reg extends Enumeration {
   type Reg = Value

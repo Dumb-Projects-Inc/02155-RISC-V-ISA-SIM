@@ -1,3 +1,5 @@
+//Reference: https://github.com/mortbopet/Ripes/blob/06cc83a48392613b0b769c6e8248baf0af087c16/src/processors/RISC-V/rv_decode.h
+
 package rvsim
 
 object Opcode {
@@ -13,7 +15,7 @@ object Fields {
   def funct7(inst: Int): Int = (inst >> 25) & 0x7f
   def opcode(inst: Int): Int = inst & 0x7f
 
-  def decode(inst: Int): OP = {
+  def decode(inst: Int): Instruction = {
     val opcode = Fields.opcode(inst)
 
     opcode match {
@@ -29,11 +31,11 @@ object Fields {
 
             funct3 match {
               case 0b001 => {
-                SLLI(rd, rs1, rs2)
+                SLLI(Reg(rd), Reg(rs1), rs2)
               }
             }
           }
-          case 0b0100000 => {}
+          //case 0b0100000 => {}
         }
 
       }

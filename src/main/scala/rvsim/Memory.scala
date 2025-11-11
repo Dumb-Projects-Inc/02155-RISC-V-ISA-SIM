@@ -24,15 +24,32 @@ class Registers() {
   }
 }
 
-class Memory() {
+class Memory(mem_size: Int = 1e6.toInt) {
   private val memory: Array[INT_8] =
-    Array.ofDim[INT_8](1e6) // 1MB of memory allocated
+    Array.ofDim[INT_8](mem_size) // 1MB of memory allocated
 
-  def read(addr: INT_32): INT_32 = {
-    memory(wordIndex(addr))
+  def readByte(addr: INT_32): INT_8 = memory(addr)
+  def writeByte(addr: INT_32, value: INT_8): Unit = memory(addr) = value
+
+  def checkWordAligned(addr: INT_32): Unit = {
+    if (addr % 4 != 0)
+      throw new Exception(
+        s"Unaligned memory access at address 0x${addr.toHexString}"
+      )
   }
 
-  def write(addr: INT_32, value: INT_32): Unit = {
-    memory(wordIndex(addr)) = value
+  def readWord(addr: INT_32): INT_32 = {
+    checkWordAligned(addr)
+    (memory(addr) & 0xff) |
+      ((memory(addr + 1) & 0xff) << 8) |
+      ((memory(addr + 2) & 0xff) << 16) |
+      ((memory(addr + 3) & 0xff) << 24)
+  }
+  def writeWord(addr: INT_32, value: INT_32): Unit = {
+    checkWordAligned(addr)
+    memory(addr) = (value & 0xff).toByte
+    memory(addr + 1) = ((value >> 8) & 0xff).toByte
+    memory(addr + 2) = ((value >> 16) & 0xff).toByte
+    memory(addr + 3) = ((value >> 24) & 0xff).toByte
   }
 }

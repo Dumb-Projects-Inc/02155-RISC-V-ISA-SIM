@@ -45,10 +45,10 @@ case class AND(rd: Reg.Value, rs1: Reg.Value, rs2: Reg.Value)
 // case class CSRRCI extends Instruction
 case class ECALL() extends Instruction
 // case class EBREAK extends Instruction
-case class URET() extends Instruction
-case class SRET() extends Instruction
-case class MRET() extends Instruction
-case class WFI() extends Instruction
+//case class URET() extends Instruction TODO: FIND OUT IF THESE EXIST
+//case class SRET() extends Instruction TODO: FIND OUT IF THESE EXIST
+//case class MRET() extends Instruction TODO: FIND OUT IF THESE EXIST
+//case class WFI() extends Instruction TODO: FIND OUT IF THESE EXIST
 // case class SFENCE_VMA extends Instruction
 case class LB(rd: Reg.Value, rs1: Reg.Value, imm: Int) extends Instruction
 case class LH(rd: Reg.Value, rs1: Reg.Value, imm: Int) extends Instruction

@@ -25,6 +25,21 @@ class Registers() {
 }
 
 class Memory(mem_size: Int = 1e6.toInt) {
+  private def to_little_endian(in: INT_32): Array[INT_8] = {
+    Array(
+      (in & 0xff).toByte,
+      ((in >> 8) & 0xff).toByte,
+      ((in >> 16) & 0xff).toByte,
+      ((in >> 24) & 0xff).toByte
+    )
+  }
+  private def from_little_endian(bytes: Array[INT_8]): INT_32 = {
+    (bytes(0) & 0xff) |
+      ((bytes(1) & 0xff) << 8) |
+      ((bytes(2) & 0xff) << 16) |
+      ((bytes(3) & 0xff) << 24)
+  }
+
   private val memory: Array[INT_8] =
     Array.ofDim[INT_8](mem_size) // 1MB of memory allocated
 
@@ -40,16 +55,21 @@ class Memory(mem_size: Int = 1e6.toInt) {
 
   def readWord(addr: INT_32): INT_32 = {
     checkWordAligned(addr)
-    (memory(addr) & 0xff) |
-      ((memory(addr + 1) & 0xff) << 8) |
-      ((memory(addr + 2) & 0xff) << 16) |
-      ((memory(addr + 3) & 0xff) << 24)
+    val bytes = Array(
+      memory(addr),
+      memory(addr + 1),
+      memory(addr + 2),
+      memory(addr + 3)
+    )
+    from_little_endian(bytes)
   }
   def writeWord(addr: INT_32, value: INT_32): Unit = {
     checkWordAligned(addr)
-    memory(addr) = (value & 0xff).toByte
-    memory(addr + 1) = ((value >> 8) & 0xff).toByte
-    memory(addr + 2) = ((value >> 16) & 0xff).toByte
-    memory(addr + 3) = ((value >> 24) & 0xff).toByte
+    // Little-endian
+    val bytes = to_little_endian(value)
+    memory(addr) = bytes(0)
+    memory(addr + 1) = bytes(1)
+    memory(addr + 2) = bytes(2)
+    memory(addr + 3) = bytes(3)
   }
 }

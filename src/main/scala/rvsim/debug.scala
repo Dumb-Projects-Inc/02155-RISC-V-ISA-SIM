@@ -1,5 +1,9 @@
 package rvsim
 
+import rvsim.Types._
+import java.nio.{ByteBuffer, ByteOrder}
+import java.nio.file.{Files, Paths}
+
 // Helper functions for debugging
 object Debug {
   def printRegisters(regs: Registers, cols: Int = 4): Unit = {
@@ -19,5 +23,25 @@ object Debug {
         .mkString(" | ")
       println(line)
     }
+  }
+
+  // Dump registers as a binary file (x0 to x31) for comparison with .res files
+  def dumpRegisterToFile(regs: Registers): Unit = {
+    val byteArray = Array.fill[UINT_32](32)(UINT_32.zero)
+    for (i <- 0 until 32) {
+      val reg = Reg(i)
+      byteArray(i) = regs(reg)
+    }
+    val byteBuffer = java.nio.ByteBuffer.allocate(32 * 4)
+    for (regValue <- byteArray) {
+      byteBuffer.putInt(regValue.toInt())
+    }
+    // Ensure little-endian output by creating a little-endian buffer and writing ints into it,
+    // then write the raw bytes directly to the file.
+    val binBuffer = ByteBuffer.allocate(32 * 4).order(ByteOrder.LITTLE_ENDIAN)
+    for (regValue <- byteArray) {
+      binBuffer.putInt(regValue.toInt)
+    }
+    Files.write(Paths.get("registers_dump.res"), binBuffer.array())
   }
 }

@@ -31,5 +31,6 @@ object Main {
     }
     vm.loadProgram(program)
     vm.run()
+    Debug.dumpRegisterToFile(vm.getRegisters())
   }
 }

@@ -8,6 +8,9 @@ class VM() {
   private var pc: UINT_32 = 0x0000_0000.u32
   private var lastInstruction: Instruction = _
 
+  // Expose registers for testing and inspection
+  def getRegisters(): Registers = regs
+
   def loadProgram(
       program: Array[INT_8],
       startAddr: UINT_32 = 0x0000_0000.u32
@@ -280,9 +283,6 @@ class VM() {
 
   }
 
-  // Expose registers for testing and inspection
-  def getRegisters(): Registers = regs
-
   def handleEcall(regs: Registers, mem: Memory): Boolean = {
     val syscallNum = regs(Reg.A7).toInt
     val arg = regs(Reg.A0)
@@ -311,6 +311,32 @@ class VM() {
 
         return false // Indicate to halt the VM
       }
+
+      case SysCall.printChar => {
+        val char = arg.toByte.toChar
+        print(char)
+      }
+
+      case SysCall.printHex => {
+        println(f"0x${arg.toInt}%x")
+      }
+      case SysCall.printBin => {
+        println(f"0b${arg.toInt.toBinaryString}%s")
+      }
+      case SysCall.printUnsigned => {
+        println(arg.toLong() & 0xffffffffL)
+      }
+      case SysCall.exitWithCode => {
+        val exitCode = arg.toInt
+        println(s"Syscall exitWithCode: Halting VM with exit code $exitCode")
+
+        // assignment tells us to print all registers on exit.
+        println("Final register state:")
+        Debug.printRegisters(regs)
+
+        return false // Indicate to halt the VM
+      }
+
       case _ => {
         throw new Exception(s"Unknown syscall number: $syscallNum")
       }

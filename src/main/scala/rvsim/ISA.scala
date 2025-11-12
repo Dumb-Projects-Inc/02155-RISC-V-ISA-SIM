@@ -9,6 +9,11 @@ object SysCall {
   //val printFloat = 2 // Not implemented
   val printString = 4
   val exit = 10
+  val printChar = 11
+  val printHex = 34
+  val printBin = 35
+  val printUnsigned = 36
+  val exitWithCode = 93
 }
 
 object Opcode {

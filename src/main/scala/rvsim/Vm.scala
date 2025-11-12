@@ -127,7 +127,9 @@ class VM() {
       }
 
       case LB(rd, rs1, imm) => {
-        // TODO: Implement
+        val addr = (regs(rs1).toInt + imm).u32
+        val byte = mem.readByte(addr)
+        regs(rd) = byte.u32
       }
 
       case LH(rd, rs1, imm) => {
@@ -135,22 +137,34 @@ class VM() {
       }
 
       case LW(rd, rs1, imm) => {
-        // TODO: Implement
+        val addr = (regs(rs1).toInt + imm).u32
+        val word = mem.readWord(addr)
+        regs(rd) = word
       }
       case LBU(rd, rs1, imm) => {
-        // TODO: Implement
+        val addr = (regs(rs1).toInt + imm).u32
+        val byte = mem.readByte(addr)
+        regs(rd) = (byte & 0xff).u32
       }
       case LHU(rd, rs1, imm) => {
-        // TODO: Implement
+        val addr = (regs(rs1).toInt + imm).u32
+        val halfWord =
+          (mem
+            .readByte(addr) & 0xff) | ((mem.readByte(addr + 1.u32) & 0xff) << 8)
+        regs(rd) = halfWord.u32
       }
       case SB(rs1, rs2, imm) => {
-        // TODO: Implement
+        val addr = (regs(rs1).toInt + imm).u32
+        val value = regs(rs2) & 0xff.u32
+        mem.writeByte(addr, value.toByte())
       }
       case SH(rs1, rs2, imm) => {
         // TODO: Implement
       }
       case SW(rs1, rs2, imm) => {
-        // TODO: Implement
+        val addr = (regs(rs1).toInt + imm).u32
+        val value = regs(rs2)
+        mem.writeWord(addr, value)
       }
       case JAL(rd, imm) => {
         // TODO: Implement

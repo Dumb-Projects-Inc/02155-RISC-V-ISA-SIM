@@ -47,6 +47,7 @@ object Types {
 
     @inline def toInt(): Int = (this.raw & 0xffffffffL).toInt
     @inline def toLong(): Long = this.raw
+    @inline def toByte(): Byte = (this.raw & 0xffL).toByte
     @inline def toHexString: String = f"${this.raw}%08x"
     override def toString: String = f"0x${raw}%08x"
 

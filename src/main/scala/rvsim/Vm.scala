@@ -6,6 +6,7 @@ class VM() {
   private val mem = new Memory()
   private val regs = new Registers()
   private var pc: UINT_32 = 0x0000_0000.u32
+  private var lastInstruction: Instruction = _
 
   def loadProgram(
       program: Array[INT_8],
@@ -20,7 +21,15 @@ class VM() {
       pc: UINT_32,
       imm: INT_32
   ): UINT_32 = {
-    pc + imm.u32 - 4.u32
+    val currentPc = pc - 4.u32
+    val target = currentPc + imm.u32
+
+    if (target == currentPc) {
+      throw new Exception(
+        s"Infinite loop detected at pc=0x${pc.toHexString} lastInstr = ${lastInstruction.toString}"
+      )
+    }
+    target
   }
 
   def step(): Boolean = {
@@ -36,7 +45,7 @@ class VM() {
     // )
 
     val instruction = Fields.decode(instr)
-
+    lastInstruction = instruction
     // Execute instruction
     instruction match {
       case LUI(rd, imm) => {
@@ -197,16 +206,17 @@ class VM() {
         mem.writeWord(addr, value)
       }
       case JAL(rd, imm) => {
-        println(f"JAL to imm=0x${imm.toInt}%x from pc=0x${pc.toInt}%08x")
+        regs(rd) = pc // No need to worry about x0 since it's not writable
         pc = calculateBranchTarget(pc, imm)
-        regs(rd) = (pc + 4.u32)
+
       }
 
       case JALR(rd, rs1, imm) => {
         val target = (regs(rs1).toInt + imm).u32 & 0xfffffffe.u32
         val returnAddr = pc
-        pc = target
         regs(rd) = returnAddr
+        pc = target
+
       }
 
       case BEQ(rs1, rs2, imm) => {
@@ -263,7 +273,9 @@ class VM() {
       //    println(s"${reg.toString}: 0x${value.toHexString}")
       //  }
       // }
-      // println(s"PC: 0x${pc.toHexString}")
+      // println( // add registers used if in instruction
+      //  s"Instruction executed = ${lastInstruction.toString}, PC=0x${pc.toHexString}: "
+      // )
     }
 
   }

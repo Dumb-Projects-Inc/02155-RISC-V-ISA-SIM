@@ -41,7 +41,7 @@ object Fields {
       case Opcode.JALR => {
         val rd = Fields.rd(instr)
         val rs1 = Fields.rs1(instr)
-        val imm = (instr >> 20) & 0xfff
+        val imm = ((instr >> 20) << 20) >> 20 // imm[11:0] Sign-extend so that imm is signed 12-bit
         JALR(Reg(rd), Reg(rs1), imm)
       }
 
@@ -122,13 +122,14 @@ object Fields {
         val rd = Fields.rd(instr)
         val rs1 = Fields.rs1(instr)
         val imm = ((instr >> 20) & 0xfff) // imm[11:0]
+        val signExtImm = (imm << 20) >> 20 // sign-extend
 
         funct3 match {
-          case 0b000 => LB(Reg(rd), Reg(rs1), imm)
-          case 0b001 => LH(Reg(rd), Reg(rs1), imm)
-          case 0b010 => LW(Reg(rd), Reg(rs1), imm)
-          case 0b100 => LBU(Reg(rd), Reg(rs1), imm)
-          case 0b101 => LHU(Reg(rd), Reg(rs1), imm)
+          case 0b000 => LB(Reg(rd), Reg(rs1), signExtImm)
+          case 0b001 => LH(Reg(rd), Reg(rs1), signExtImm)
+          case 0b010 => LW(Reg(rd), Reg(rs1), signExtImm)
+          case 0b100 => LBU(Reg(rd), Reg(rs1), signExtImm)
+          case 0b101 => LHU(Reg(rd), Reg(rs1), signExtImm)
         }
       }
 
@@ -137,7 +138,7 @@ object Fields {
         val rs1 = Fields.rs1(instr)
         val rs2 = Fields.rs2(instr)
         val imm12   = (((instr >>> 25) & 0x7f) << 5) | ((instr >>> 7) & 0x1f)
-        val imm     = (imm12 << 20) >> 20  // sign-extend to 32 bits
+        val imm     = (imm12 << 20) >> 20  // sign-extend
 
         funct3 match {
           case 0b000 => SB(Reg(rs1), Reg(rs2), imm)

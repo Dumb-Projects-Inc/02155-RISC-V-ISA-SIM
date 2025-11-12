@@ -30,7 +30,7 @@ class VM() {
     // Execute instruction
     instruction match {
       case LUI(rd, imm) => {
-        val value = (imm << 12).u32
+        val value = imm.u32
         regs(rd) = value
       }
 
@@ -205,6 +205,9 @@ class VM() {
     }
 
   }
+
+  // Expose registers for testing and inspection
+  def getRegisters(): Registers = regs
 
   def handleEcall(regs: Registers, mem: Memory): Boolean = {
     val syscallNum = regs(Reg.A7).toInt

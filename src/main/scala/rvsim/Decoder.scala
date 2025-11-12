@@ -48,7 +48,7 @@ object Fields {
         val funct3 = Fields.funct3(inst)
         funct3 match {
           case 0b000 => {
-            val imm = (inst >> 20) & 0xfff
+            val imm = (inst >> 20) & 0xfff // No need to sign-extend as only ecall and ebreak exist
             imm match {
               case 0 => ECALL()
               case 1 => throw new Exception("EBREAK not implemented")
@@ -62,7 +62,7 @@ object Fields {
         val funct3 = Fields.funct3(inst)
         val rd = Fields.rd(inst)
         val rs1 = Fields.rs1(inst)
-        val imm = (inst >> 20) & 0xfff
+        val imm = ((inst >> 20) << 20) >> 20 // Sign-extend so that imm is signed 12-bit
 
         funct3 match {
           case 0b000 => ADDI(Reg(rd), Reg(rs1), imm)
@@ -120,7 +120,7 @@ object Fields {
         val funct3 = Fields.funct3(inst)
         val rd = Fields.rd(inst)
         val rs1 = Fields.rs1(inst)
-        val imm = (inst >> 20) & 0xfff
+        val imm = ((inst >> 20) & 0xfff << 20) >> 20 // Sign-extend so that imm is signed 12-bit
 
         funct3 match {
           case 0b000 => LB(Reg(rd), Reg(rs1), imm)
@@ -135,7 +135,7 @@ object Fields {
         val funct3 = Fields.funct3(inst)
         val rs1 = Fields.rs1(inst)
         val rs2 = Fields.rs2(inst)
-        val imm = ((inst >> 7) & 0x1f) | ((inst >> 25) & 0xfe0)
+        val imm = ((inst >> 7) & 0x1f) | ((inst >> 25) & 0xfe0) //TODO: Sign-extend is probably needed but omitted for brevity
 
         funct3 match {
           case 0b000 => SB(Reg(rs1), Reg(rs2), imm)

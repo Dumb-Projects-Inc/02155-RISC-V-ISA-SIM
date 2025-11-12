@@ -17,7 +17,8 @@ class Registers() {
   }
 }
 
-class Memory(mem_size: Int = 1e6.toInt) {
+// standard memory size set to the max needed by loop test
+class Memory(mem_size: Int = 0x100000.toInt) {
   private def to_little_endian(in: UINT_32): Array[INT_8] = {
     val inLong = in.toLong()
     Array(
@@ -35,7 +36,7 @@ class Memory(mem_size: Int = 1e6.toInt) {
   }
 
   private val memory: Array[INT_8] =
-    Array.ofDim[INT_8](mem_size) // 1MB of memory allocated
+    Array.ofDim[INT_8](mem_size)
 
   private def idx(addr: UINT_32): Int =
     (addr.raw & 0xffffffffL).toInt // This cannot index full 32-bit space but scala arrays cannot either

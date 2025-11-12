@@ -4,7 +4,8 @@ package rvsim
 object Debug {
   def printRegisters(regs: Registers, cols: Int = 4): Unit = {
     val names = Reg.values.toArray.map(_.toString.padTo(4, ' '))
-    val values = Reg.values.toArray.map(r => f"0x${regs(r)}%08x")
+    val values =
+      Reg.values.toArray.map(r => f"0x${regs(r).toInt}%08x")
 
     val rows = Math.ceil(names.length.toDouble / cols).toInt
     for (r <- 0 until rows) {

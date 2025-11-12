@@ -1,11 +1,7 @@
 //Reference: https://github.com/mortbopet/Ripes/blob/06cc83a48392613b0b769c6e8248baf0af087c16/src/processors/RISC-V/rv_decode.h
 
 package rvsim
-
-//TODO: Find instructions where these are used
-object helper {
-  def toUnsigned32(value: Int): Long = value.toLong & 0xFFFFFFFFL
-}
+import rvsim.Types.UINT_32
 
 
 object Fields {
@@ -16,7 +12,8 @@ object Fields {
   def funct7(inst: Int): Int = (inst >> 25) & 0x7f
   def opcode(inst: Int): Int = inst & 0x7f
 
-  def decode(inst: Int): Instruction = {
+  def decode(instrVal: UINT_32): Instruction = {
+    val inst = instrVal.toInt()
     val opcode = Fields.opcode(inst)
 
     opcode match {

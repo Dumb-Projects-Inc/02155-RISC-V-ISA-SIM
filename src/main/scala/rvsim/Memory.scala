@@ -1,11 +1,5 @@
 package rvsim
 
-object Types {
-  type INT_8 = Byte
-  type INT_16 = Short
-  type INT_32 = Int
-  type INT_64 = Long
-}
 import Types._
 
 object Reg extends Enumeration {
@@ -15,61 +9,66 @@ object Reg extends Enumeration {
 }
 
 class Registers() {
-  private val regs: Array[INT_32] = Array.ofDim[INT_32](32)
-
+  private val regs: Array[UINT_32] = Array.fill(32)(UINT_32.zero)
   // Overload access operators
-  def apply(reg: Reg.Value): INT_32 = regs(reg.id)
-  def update(reg: Reg.Value, value: INT_32): Unit = {
+  def apply(reg: Reg.Value): UINT_32 = regs(reg.id)
+  def update(reg: Reg.Value, value: UINT_32): Unit = {
     if (reg != Reg.ZERO) regs(reg.id) = value
   }
 }
 
 class Memory(mem_size: Int = 1e6.toInt) {
-  private def to_little_endian(in: INT_32): Array[INT_8] = {
+  private def to_little_endian(in: UINT_32): Array[INT_8] = {
+    val inLong = in.toLong()
     Array(
-      (in & 0xff).toByte,
-      ((in >> 8) & 0xff).toByte,
-      ((in >> 16) & 0xff).toByte,
-      ((in >> 24) & 0xff).toByte
+      (inLong & 0xff).toByte,
+      ((inLong >> 8) & 0xff).toByte,
+      ((inLong >> 16) & 0xff).toByte,
+      ((inLong >> 24) & 0xff).toByte
     )
   }
-  private def from_little_endian(bytes: Array[INT_8]): INT_32 = {
-    (bytes(0) & 0xff) |
+  private def from_little_endian(bytes: Array[INT_8]): UINT_32 = {
+    ((bytes(0) & 0xff) |
       ((bytes(1) & 0xff) << 8) |
       ((bytes(2) & 0xff) << 16) |
-      ((bytes(3) & 0xff) << 24)
+      ((bytes(3) & 0xff) << 24)).u32
   }
 
   private val memory: Array[INT_8] =
     Array.ofDim[INT_8](mem_size) // 1MB of memory allocated
 
-  def readByte(addr: INT_32): INT_8 = memory(addr)
-  def writeByte(addr: INT_32, value: INT_8): Unit = memory(addr) = value
+  private def idx(addr: UINT_32): Int =
+    (addr.raw & 0xffffffffL).toInt // This cannot index full 32-bit space but scala arrays cannot either
 
-  def checkWordAligned(addr: INT_32): Unit = {
+  def readByte(addr: UINT_32): INT_8 = memory(idx(addr))
+  def writeByte(addr: UINT_32, value: INT_8): Unit = memory(idx(addr)) = value
+
+  def checkWordAligned(addr: UINT_32): Unit = {
     if (addr % 4 != 0)
       throw new Exception(
         s"Unaligned memory access at address 0x${addr.toHexString}"
       )
   }
 
-  def readWord(addr: INT_32): INT_32 = {
+  def readWord(addr: UINT_32): UINT_32 = {
     checkWordAligned(addr)
+    val addrInt = idx(addr)
     val bytes = Array(
-      memory(addr),
-      memory(addr + 1),
-      memory(addr + 2),
-      memory(addr + 3)
+      memory(addrInt),
+      memory(addrInt + 1),
+      memory(addrInt + 2),
+      memory(addrInt + 3)
     )
     from_little_endian(bytes)
   }
-  def writeWord(addr: INT_32, value: INT_32): Unit = {
+  def writeWord(addr: UINT_32, value: UINT_32): Unit = {
     checkWordAligned(addr)
     // Little-endian
     val bytes = to_little_endian(value)
-    memory(addr) = bytes(0)
-    memory(addr + 1) = bytes(1)
-    memory(addr + 2) = bytes(2)
-    memory(addr + 3) = bytes(3)
+    val addrInt = idx(addr)
+    memory(addrInt) = bytes(0)
+    memory(addrInt + 1) = bytes(1)
+    memory(addrInt + 2) = bytes(2)
+    memory(addrInt + 3) = bytes(3)
   }
 }

@@ -1,5 +1,7 @@
 package rvsim
 
+import rvsim.Types.UINT_32
+
 // Same syscalls as Ripes
 object SysCall {
   val None = 0

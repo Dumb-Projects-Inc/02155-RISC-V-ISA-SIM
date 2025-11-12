@@ -16,6 +16,12 @@ class VM() {
     }
     pc = startAddr
   }
+  private def calculateBranchTarget(
+      pc: UINT_32,
+      imm: INT_32
+  ): UINT_32 = {
+    pc + imm.u32 - 4.u32
+  }
 
   def step(): Boolean = {
     // Fetch instruction
@@ -25,6 +31,10 @@ class VM() {
     pc += 4.u32
 
     // Decode and execute instruction
+    // println(
+    //  f"pc=0x${pc.toInt}%x inst=0x${instr.toInt}%08x opcode=${instr.toInt & 0x7f}%02x funct3=${(instr.toInt >>> 12) & 7}%d rd=${(instr.toInt >>> 7) & 0x1f}%d"
+    // )
+
     val instruction = Fields.decode(instr)
 
     // Execute instruction
@@ -44,15 +54,16 @@ class VM() {
       }
 
       case SLTI(rd, rs1, imm) => {
-        // TODO: Implement
+        regs(rd) = if (regs(rs1).toInt < imm) 1.u32 else 0.u32
       }
 
       case SLTIU(rd, rs1, imm) => {
-        // TODO: Implement
+        regs(rd) = if (regs(rs1) < imm.u32) 1.u32 else 0.u32
       }
 
       case XORI(rd, rs1, imm) => {
-        // TODO: Implement
+        val result = regs(rs1) ^ imm.u32
+        regs(rd) = result
       }
 
       case ORI(rd, rs1, imm) => {
@@ -66,15 +77,18 @@ class VM() {
       }
 
       case SLLI(rd, rs1, shamt) => {
-        // TODO: Implement
+        val result = regs(rs1) << shamt
+        regs(rd) = result
       }
 
       case SRLI(rd, rs1, shamt) => {
-        // TODO: Implement
+        val result = regs(rs1) >> shamt
+        regs(rd) = result
       }
 
       case SRAI(rd, rs1, shamt) => {
-        // TODO: Implement
+        val result = (regs(rs1).toInt >> shamt).u32 // preserve sign bit
+        regs(rd) = result
       }
 
       case ADD(rd, rs1, rs2) => {
@@ -88,15 +102,17 @@ class VM() {
       }
 
       case SLL(rd, rs1, rs2) => {
-        // TODO: Implement
+        val low5 = (regs(rs2) & 0x1f.u32).toInt
+        val result = regs(rs1) << low5
+        regs(rd) = result
       }
 
       case SLT(rd, rs1, rs2) => {
-        // TODO: Implement
+        regs(rd) = if (regs(rs1).toInt < regs(rs2).toInt) 1.u32 else 0.u32
       }
 
       case SLTU(rd, rs1, rs2) => {
-        // TODO: Implement
+        regs(rd) = if (regs(rs1) < regs(rs2)) 1.u32 else 0.u32
       }
 
       case XOR(rd, rs1, rs2) => {
@@ -105,11 +121,15 @@ class VM() {
       }
 
       case SRL(rd, rs1, rs2) => {
-        // TODO: Implement
+        val low5 = (regs(rs2) & 0x1f.u32).toInt
+        val result = regs(rs1) >> low5
+        regs(rd) = result
       }
 
       case SRA(rd, rs1, rs2) => {
-        // TODO: Implement
+        val low5 = (regs(rs2) & 0x1f.u32).toInt
+        val result = (regs(rs1).toInt >> low5).u32 // preserve sign bit
+        regs(rd) = result
       }
 
       case OR(rd, rs1, rs2) => {
@@ -129,11 +149,17 @@ class VM() {
       case LB(rd, rs1, imm) => {
         val addr = (regs(rs1).toInt + imm).u32
         val byte = mem.readByte(addr)
-        regs(rd) = byte.u32
+        val signExtended = (byte.toInt << 24) >> 24
+        regs(rd) = signExtended.u32
       }
 
       case LH(rd, rs1, imm) => {
-        // TODO: Implement
+        val addr = (regs(rs1).toInt + imm).u32
+        val high = mem.readByte(addr + 1.u32) & 0xff
+        val low = mem.readByte(addr) & 0xff
+        val halfword = (((high << 8) | low) << 16) >> 16 // sign-extend
+
+        regs(rd) = halfword.u32
       }
 
       case LW(rd, rs1, imm) => {
@@ -159,7 +185,11 @@ class VM() {
         mem.writeByte(addr, value.toByte())
       }
       case SH(rs1, rs2, imm) => {
-        // TODO: Implement
+        val addr = (regs(rs1).toInt + imm).u32
+        val value = regs(rs2)
+        println(f"SH value=0x${value.toInt}%04x at addr=0x${addr.toInt}%08x")
+        mem.writeByte(addr, (value & 0xff).toByte())
+        mem.writeByte(addr + 1.u32, ((value.toInt >>> 8) & 0xff).toByte)
       }
       case SW(rs1, rs2, imm) => {
         val addr = (regs(rs1).toInt + imm).u32
@@ -167,35 +197,52 @@ class VM() {
         mem.writeWord(addr, value)
       }
       case JAL(rd, imm) => {
-        // TODO: Implement
+        println(f"JAL to imm=0x${imm.toInt}%x from pc=0x${pc.toInt}%08x")
+        pc = calculateBranchTarget(pc, imm)
+        regs(rd) = (pc + 4.u32)
       }
 
       case JALR(rd, rs1, imm) => {
-        // TODO: Implement
+        val target = (regs(rs1).toInt + imm).u32 & 0xfffffffe.u32
+        val returnAddr = pc
+        pc = target
+        regs(rd) = returnAddr
       }
 
       case BEQ(rs1, rs2, imm) => {
-        // TODO: Implement
+        if (regs(rs1) == regs(rs2)) {
+          pc = calculateBranchTarget(pc, imm)
+        }
       }
 
       case BNE(rs1, rs2, imm) => {
-        // TODO: Implement
+        if (regs(rs1) != regs(rs2)) {
+          pc = calculateBranchTarget(pc, imm)
+        }
       }
 
       case BLT(rs1, rs2, imm) => {
-        // TODO: Implement
+        if (regs(rs1).toInt < regs(rs2).toInt) {
+          pc = calculateBranchTarget(pc, imm)
+        }
       }
 
       case BGE(rs1, rs2, imm) => {
-        // TODO: Implement
+        if (regs(rs1).toInt >= regs(rs2).toInt) {
+          pc = calculateBranchTarget(pc, imm)
+        }
       }
 
       case BLTU(rs1, rs2, imm) => {
-        // TODO: Implement
+        if (regs(rs1) < regs(rs2)) {
+          pc = calculateBranchTarget(pc, imm)
+        }
       }
 
       case BGEU(rs1, rs2, imm) => {
-        // TODO: Implement
+        if (regs(rs1) >= regs(rs2)) {
+          pc = calculateBranchTarget(pc, imm)
+        }
       }
 
       case _ => {
@@ -207,6 +254,7 @@ class VM() {
   }
 
   def run(): Unit = {
+    println("Starting VM execution...")
     while (step()) {
       // Print registers non -zero registers for debugging
       // for (reg <- Reg.values if reg != Reg.ZERO) {

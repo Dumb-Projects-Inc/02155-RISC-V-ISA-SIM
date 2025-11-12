@@ -13,42 +13,43 @@ object Fields {
   def opcode(inst: Int): Int = inst & 0x7f
 
   def decode(instrVal: UINT_32): Instruction = {
-    val inst = instrVal.toInt()
-    val opcode = Fields.opcode(inst)
+    val instr = instrVal.toInt()
+    val opcode = Fields.opcode(instr)
 
     opcode match {
       case Opcode.LUI => {
-        val rd = Fields.rd(inst)
-        val imm = inst & 0xfffff000
+        val rd = Fields.rd(instr)
+        val imm = instr & 0xfffff000
         LUI(Reg(rd), imm)
       }
       case Opcode.AUIPC => {
-        val rd = Fields.rd(inst)
-        val imm = inst & 0xfffff000
+        val rd = Fields.rd(instr)
+        val imm = instr & 0xfffff000
         AUIPC(Reg(rd), imm)
       }
 
       case Opcode.JAL => {
-        val rd = Fields.rd(inst)
-        val imm = ((inst >> 12) & 0xff000) |
-          ((inst >> 20) & 0x7fe) |
-          ((inst << 11) & 0x800) |
-          ((inst >> 31) & 0x100000)
-        JAL(Reg(rd), imm)
+        val rd = Fields.rd(instr)
+        val imm = (((instr >>> 31) & 0x1)   << 20)  | // imm[20]
+                  (((instr >>> 21) & 0x3ff) << 1)   | // imm[10:1]
+                  (((instr >>> 20) & 1)     << 11)  | // imm[11]
+                  (((instr >>> 12) & 0x3ff) << 12)    // imm[19:12]
+        val signExtImm = (imm << 11) >> 11 // sign-extend
+        JAL(Reg(rd), signExtImm)
       }
 
       case Opcode.JALR => {
-        val rd = Fields.rd(inst)
-        val rs1 = Fields.rs1(inst)
-        val imm = (inst >> 20) & 0xfff
+        val rd = Fields.rd(instr)
+        val rs1 = Fields.rs1(instr)
+        val imm = (instr >> 20) & 0xfff
         JALR(Reg(rd), Reg(rs1), imm)
       }
 
       case Opcode.SYSTEM => {
-        val funct3 = Fields.funct3(inst)
+        val funct3 = Fields.funct3(instr)
         funct3 match {
           case 0b000 => {
-            val imm = (inst >> 20) & 0xfff // No need to sign-extend as only ecall and ebreak exist
+            val imm = (instr >> 20) & 0xfff // No need to sign-extend as only ecall and ebreak exist
             imm match {
               case 0 => ECALL()
               case 1 => throw new Exception("EBREAK not implemented")
@@ -59,10 +60,10 @@ object Fields {
         }
       }
       case Opcode.OPIMM => {
-        val funct3 = Fields.funct3(inst)
-        val rd = Fields.rd(inst)
-        val rs1 = Fields.rs1(inst)
-        val imm = ((inst >> 20) << 20) >> 20 // Sign-extend so that imm is signed 12-bit
+        val funct3 = Fields.funct3(instr)
+        val rd = Fields.rd(instr)
+        val rs1 = Fields.rs1(instr)
+        val imm = ((instr >> 20) << 20) >> 20 // Sign-extend so that imm is signed 12-bit
 
         funct3 match {
           case 0b000 => ADDI(Reg(rd), Reg(rs1), imm)
@@ -72,12 +73,12 @@ object Fields {
           case 0b110 => ORI(Reg(rd), Reg(rs1), imm)
           case 0b111 => ANDI(Reg(rd), Reg(rs1), imm)
           case 0b001 => {
-            val shamt = Fields.rs2(inst)
+            val shamt = Fields.rs2(instr)
             SLLI(Reg(rd), Reg(rs1), shamt)
           }
           case 0b101 => {
-            val shamt = Fields.rs2(inst)
-            val funct7 = Fields.funct7(inst)
+            val shamt = Fields.rs2(instr)
+            val funct7 = Fields.funct7(instr)
             funct7 match {
               case 0b0000000 => SRLI(Reg(rd), Reg(rs1), shamt)
               case 0b0100000 => SRAI(Reg(rd), Reg(rs1), shamt)
@@ -88,11 +89,11 @@ object Fields {
 
 
       case Opcode.R_TYPE => {
-        val funct7 = Fields.funct7(inst)
-        val funct3 = Fields.funct3(inst)
-        val rs2 = Fields.rs2(inst)
-        val rs1 = Fields.rs1(inst)
-        val rd = Fields.rd(inst)
+        val funct7 = Fields.funct7(instr)
+        val funct3 = Fields.funct3(instr)
+        val rs2 = Fields.rs2(instr)
+        val rs1 = Fields.rs1(instr)
+        val rd = Fields.rd(instr)
 
         funct3 match {
           case 0b000 => {
@@ -117,10 +118,10 @@ object Fields {
       }
 
       case Opcode.LOAD => {
-        val funct3 = Fields.funct3(inst)
-        val rd = Fields.rd(inst)
-        val rs1 = Fields.rs1(inst)
-        val imm = ((inst >> 20) & 0xfff << 20) >> 20 // Sign-extend so that imm is signed 12-bit
+        val funct3 = Fields.funct3(instr)
+        val rd = Fields.rd(instr)
+        val rs1 = Fields.rs1(instr)
+        val imm = ((instr >> 20) & 0xfff) // imm[11:0]
 
         funct3 match {
           case 0b000 => LB(Reg(rd), Reg(rs1), imm)
@@ -132,10 +133,11 @@ object Fields {
       }
 
       case Opcode.STORE => {
-        val funct3 = Fields.funct3(inst)
-        val rs1 = Fields.rs1(inst)
-        val rs2 = Fields.rs2(inst)
-        val imm = ((inst >> 7) & 0x1f) | ((inst >> 25) & 0xfe0) //TODO: Sign-extend is probably needed but omitted for brevity
+        val funct3 = Fields.funct3(instr)
+        val rs1 = Fields.rs1(instr)
+        val rs2 = Fields.rs2(instr)
+        val imm12   = (((instr >>> 25) & 0x7f) << 5) | ((instr >>> 7) & 0x1f)
+        val imm     = (imm12 << 20) >> 20  // sign-extend to 32 bits
 
         funct3 match {
           case 0b000 => SB(Reg(rs1), Reg(rs2), imm)
@@ -145,21 +147,25 @@ object Fields {
       }
 
       case Opcode.B_TYPE => {
-        val funct3 = Fields.funct3(inst)
-        val rs1 = Fields.rs1(inst)
-        val rs2 = Fields.rs2(inst)
-        val imm = ((inst >> 7) & 0x1e) |
-          ((inst >> 20) & 0x7e0) |
-          ((inst << 4) & 0x800) |
-          ((inst >> 31) & 0x1000)
+        val funct3 = Fields.funct3(instr)
+        val rs1 = Fields.rs1(instr)
+        val rs2 = Fields.rs2(instr)
+        val imm = (((instr >>> 31) & 0x1)  << 12) | // imm[12]
+                  (((instr >>> 7)  & 0x1)  << 11) | // imm[11]
+                  (((instr >>> 25) & 0x3f) << 5 ) | // imm[10:5]
+                  (((instr >>> 8)  & 0xf)  << 1 )   // imm[4:1]
+        
+        // sign-extend imm
+        val imm_se = (imm << 19) >> 19 // Sign-extend to 32 bits
+
 
         funct3 match {
-          case 0b000 => BEQ(Reg(rs1), Reg(rs2), imm)
-          case 0b001 => BNE(Reg(rs1), Reg(rs2), imm)
-          case 0b100 => BLT(Reg(rs1), Reg(rs2), imm)
-          case 0b101 => BGE(Reg(rs1), Reg(rs2), imm)
-          case 0b110 => BLTU(Reg(rs1), Reg(rs2), imm)
-          case 0b111 => BGEU(Reg(rs1), Reg(rs2), imm)
+          case 0b000 => BEQ(Reg(rs1), Reg(rs2), imm_se)
+          case 0b001 => BNE(Reg(rs1), Reg(rs2), imm_se)
+          case 0b100 => BLT(Reg(rs1), Reg(rs2), imm_se)
+          case 0b101 => BGE(Reg(rs1), Reg(rs2), imm_se)
+          case 0b110 => BLTU(Reg(rs1), Reg(rs2), imm_se)
+          case 0b111 => BGEU(Reg(rs1), Reg(rs2), imm_se)
         }
       }
 

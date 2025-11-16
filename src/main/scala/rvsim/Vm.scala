@@ -336,6 +336,13 @@ class VM() {
         return false // Indicate to halt the VM
       }
 
+      // Added for compatibilty with tests from TheAIBot
+      case SysCall.None => {
+        println("Final register state:")
+        Debug.printRegisters(regs)
+        return false
+      }
+
       case _ => {
         throw new Exception(s"Unknown syscall number: $syscallNum")
       }

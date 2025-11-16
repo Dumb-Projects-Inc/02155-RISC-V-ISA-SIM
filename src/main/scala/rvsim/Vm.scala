@@ -57,7 +57,7 @@ class VM() {
       }
 
       case AUIPC(rd, imm) => {
-        val value = pc + (imm << 12).u32 - 4.u32
+        val value = (pc - 4.u32) + imm.u32
         regs(rd) = value
       }
       case ADDI(rd, rs1, imm) => {

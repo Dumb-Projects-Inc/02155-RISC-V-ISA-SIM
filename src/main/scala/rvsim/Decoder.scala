@@ -5,12 +5,19 @@ import rvsim.Types.UINT_32
 
 
 object Fields {
-  def rd(inst: Int): Int = (inst >> 7) & 0x1f
-  def rs1(inst: Int): Int = (inst >> 15) & 0x1f
-  def rs2(inst: Int): Int = (inst >> 20) & 0x1f
-  def funct3(inst: Int): Int = (inst >> 12) & 0x7
-  def funct7(inst: Int): Int = (inst >> 25) & 0x7f
-  def opcode(inst: Int): Int = inst & 0x7f
+
+  def extract(data: Int, end: Int, start: Int): Int = {
+    val length = end - start + 1
+    val mask = (1 << length) - 1
+    (data >> start) & mask
+  }
+
+  def rd(inst: Int): Int = extract(inst, 11, 7)
+  def rs1(inst: Int): Int = extract(inst, 19, 15)
+  def rs2(inst: Int): Int = extract(inst, 24,20)
+  def funct3(inst: Int): Int = extract(inst, 14, 12)
+  def funct7(inst: Int): Int = extract(inst, 31,25)
+  def opcode(inst: Int): Int = extract(inst, 6, 0)
 
   def decode(instrVal: UINT_32): Instruction = {
     val instr = instrVal.toInt()

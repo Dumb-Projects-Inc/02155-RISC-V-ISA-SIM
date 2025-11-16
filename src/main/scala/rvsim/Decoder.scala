@@ -51,7 +51,7 @@ object Fields {
       case Opcode.JALR => {
         val rd = Fields.rd(instr)
         val rs1 = Fields.rs1(instr)
-        val imm = extract(instr, 31, 20) << 20 >> 20 // Sign-extend so that imm is signed 12-bit
+        val imm = (extract(instr, 31, 20) << 20) >> 20 // Sign-extend so that imm is signed 12-bit
         JALR(Reg(rd), Reg(rs1), imm)
       }
 
@@ -59,7 +59,7 @@ object Fields {
         val funct3 = Fields.funct3(instr)
         funct3 match {
           case 0b000 => {
-            val imm = (instr >> 20) & 0xfff // No need to sign-extend as only ecall and ebreak exist
+            val imm = extract(instr,31,20) // No need to sign-extend as only ecall and ebreak exist
             imm match {
               case 0 => ECALL()
               case 1 => throw new Exception("EBREAK not implemented")
@@ -73,7 +73,7 @@ object Fields {
         val funct3 = Fields.funct3(instr)
         val rd = Fields.rd(instr)
         val rs1 = Fields.rs1(instr)
-        val imm = ((instr >> 20) << 20) >> 20 // Sign-extend so that imm is signed 12-bit
+        val imm = (extract(instr,31,20) << 20) >> 20 // Sign-extend so that imm is signed 12-bit
 
         funct3 match {
           case 0b000 => ADDI(Reg(rd), Reg(rs1), imm)

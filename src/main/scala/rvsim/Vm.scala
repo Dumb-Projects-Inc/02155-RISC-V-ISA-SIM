@@ -199,7 +199,6 @@ class VM() {
       case SH(rs1, rs2, imm) => {
         val addr = (regs(rs1).toInt + imm).u32
         val value = regs(rs2)
-        println(f"SH value=0x${value.toInt}%04x at addr=0x${addr.toInt}%08x")
         mem.writeByte(addr, (value & 0xff).toByte())
         mem.writeByte(addr + 1.u32, ((value.toInt >>> 8) & 0xff).toByte)
       }

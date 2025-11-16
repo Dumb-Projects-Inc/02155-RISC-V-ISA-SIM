@@ -28,7 +28,7 @@
 
     devShells = forEachSupportedSystem ({pkgs}: {
       default = pkgs.mkShell {
-        packages = with pkgs; [sbt jdk];
+        packages = with pkgs; [sbt jdk coursier];
       };
     });
   };

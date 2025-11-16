@@ -24,14 +24,16 @@ object Fields {
     val opcode = Fields.opcode(instr)
 
     opcode match {
+
       case Opcode.LUI => {
         val rd = Fields.rd(instr)
         val imm = extract(instr, 31,12) << 12
         LUI(Reg(rd), imm)
       }
+
       case Opcode.AUIPC => {
         val rd = Fields.rd(instr)
-        val imm = instr & 0xfffff000
+        val imm = extract(instr, 31,12) << 12
         AUIPC(Reg(rd), imm)
       }
 

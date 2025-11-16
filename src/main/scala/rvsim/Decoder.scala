@@ -43,7 +43,7 @@ object Fields {
                   (extract(instr, 30,21)  << 1)   | // imm[10:1]
                   (extract(instr, 20, 20) << 11)  | // imm[11]
                   (extract(instr, 19,12)   << 12)   // imm[19:12]
-        // sign-extend: moves sign bit to leftmost position, then arithmetic shifts it back resulting in sign extensions
+        // sign-extend: moves sign bit to msb position, then arithmetic shifts it back resulting in sign extensions
         val signExtImm = (imm << 11) >> 11
         JAL(Reg(rd), signExtImm)
       }
@@ -51,7 +51,7 @@ object Fields {
       case Opcode.JALR => {
         val rd = Fields.rd(instr)
         val rs1 = Fields.rs1(instr)
-        val imm = ((instr >> 20) << 20) >> 20 // imm[11:0] Sign-extend so that imm is signed 12-bit
+        val imm = extract(instr, 31, 20) << 20 >> 20 // Sign-extend so that imm is signed 12-bit
         JALR(Reg(rd), Reg(rs1), imm)
       }
 

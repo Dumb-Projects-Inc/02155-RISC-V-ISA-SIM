@@ -26,7 +26,7 @@ object Fields {
     opcode match {
       case Opcode.LUI => {
         val rd = Fields.rd(instr)
-        val imm = instr & 0xfffff000
+        val imm = extract(instr, 31,12) << 12
         LUI(Reg(rd), imm)
       }
       case Opcode.AUIPC => {
@@ -37,11 +37,12 @@ object Fields {
 
       case Opcode.JAL => {
         val rd = Fields.rd(instr)
-        val imm = (((instr >>> 31) & 0x1)   << 20)  | // imm[20]
-                  (((instr >>> 21) & 0x3ff) << 1)   | // imm[10:1]
-                  (((instr >>> 20) & 1)     << 11)  | // imm[11]
-                  (((instr >>> 12) & 0x3ff) << 12)    // imm[19:12]
-        val signExtImm = (imm << 11) >> 11 // sign-extend
+        val imm = (extract(instr, 31,31)  << 20)  | // imm[20]
+                  (extract(instr, 30,21)  << 1)   | // imm[10:1]
+                  (extract(instr, 20, 20) << 11)  | // imm[11]
+                  (extract(instr, 19,12)   << 12)   // imm[19:12]
+        // sign-extend: moves sign bit to leftmost position, then arithmetic shifts it back resulting in sign extensions
+        val signExtImm = (imm << 11) >> 11
         JAL(Reg(rd), signExtImm)
       }
 

@@ -38,17 +38,17 @@ class VM() {
   def step(): Boolean = {
     // Fetch instruction
     val instr = mem.readWord(pc)
+    // Decode instruction
+    val instruction = Fields.decode(instr)
+    lastInstruction = instruction
 
     // Default increment PC by 4 JAL and JALR will modify it later
     pc += 4.u32
 
-    // Decode and execute instruction
     // println(
     //  f"pc=0x${pc.toInt}%x inst=0x${instr.toInt}%08x opcode=${instr.toInt & 0x7f}%02x funct3=${(instr.toInt >>> 12) & 7}%d rd=${(instr.toInt >>> 7) & 0x1f}%d"
     // )
 
-    val instruction = Fields.decode(instr)
-    lastInstruction = instruction
     // Execute instruction
     instruction match {
       case LUI(rd, imm) => {

@@ -19,7 +19,7 @@ class Registers() {
 }
 
 // standard memory size set to the max needed by loop test
-class Memory(mem_size: Int = 0x100000.toInt) {
+class Memory(mem_size: Int = 0x200000.toInt) {
   private def to_little_endian(in: UINT_32): Array[INT_8] = {
     val inLong = in.toLong()
     Array(

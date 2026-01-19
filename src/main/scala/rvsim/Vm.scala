@@ -10,6 +10,8 @@ class VM() {
 
   // Expose registers for testing and inspection
   def getRegisters(): Registers = regs
+  def getRegistersArray(): Array[Long] = regs.getRawArray()
+  def getPc(): Long = pc.toLong()
 
   def loadProgram(
       program: Array[INT_8],

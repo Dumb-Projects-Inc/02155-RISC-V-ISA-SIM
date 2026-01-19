@@ -10,6 +10,7 @@ object Reg extends Enumeration {
 
 class Registers() {
   private val regs: Array[UINT_32] = Array.fill(32)(UINT_32.zero)
+  def getRawArray(): Array[Long] = regs.map(_.toLong())
   // Overload access operators
   def apply(reg: Reg.Value): UINT_32 = regs(reg.id)
   def update(reg: Reg.Value, value: UINT_32): Unit = {

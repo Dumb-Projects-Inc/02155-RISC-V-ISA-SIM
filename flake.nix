@@ -7,7 +7,7 @@
     self,
     nixpkgs,
   }: let
-    javaVersion = 25; # Change this value to update the whole stack
+    javaVersion = 21; # Change this value to update the whole stack
 
     supportedSystems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
     forEachSupportedSystem = f:
@@ -28,7 +28,7 @@
 
     devShells = forEachSupportedSystem ({pkgs}: {
       default = pkgs.mkShell {
-        packages = with pkgs; [sbt jdk coursier];
+        packages = with pkgs; [sbt jdk metals];
       };
     });
   };
